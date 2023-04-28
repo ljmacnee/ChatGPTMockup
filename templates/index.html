@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Tic Tac Toe</title>
+  </head>
+  <body onload="updateButtons()">
+    <h1>Tic Tac Toe</h1>
+    <table>
+      <tr>
+        <td><button id="cell-0-0" onclick="playMove(0, 0)"></button></td>
+        <td><button id="cell-0-1" onclick="playMove(0, 1)"></button></td>
+        <td><button id="cell-0-2" onclick="playMove(0, 2)"></button></td>
+      </tr>
+      <tr>
+        <td><button id="cell-1-0" onclick="playMove(1, 0)"></button></td>
+        <td><button id="cell-1-1" onclick="playMove(1, 1)"></button></td>
+        <td><button id="cell-1-2" onclick="playMove(1, 2)"></button></td>
+      </tr>
+      <tr>
+        <td><button id="cell-2-0" onclick="playMove(2, 0)"></button></td>
+        <td><button id="cell-2-1" onclick="playMove(2, 1)"></button></td>
+        <td><button id="cell-2-2" onclick="playMove(2, 2)"></button></td>
+      </tr>
+    </table>
+    <p id="status"></p>
+    <script>
+      function playMove(row, col) {
+        const button = document.getElementById(`cell-${row}-${col}`);
+        if (!button.textContent) {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/play_move');
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = () => {
+            const data = JSON.parse(xhr.responseText);
+            if (data.gameOver) {
+              endGame(data.status);
+            }
+            else{
+              button.textContent = data.symbol;
+            }
+           
+          };
+          const payload = JSON.stringify({ row, col });
+          xhr.send(payload);
+        } else {
+          alert('This cell is already occupied!');
+        }
+      }
+
+      function endGame(status) {
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = status;
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+          button.disabled = true;
+        });
+      }
+
+      function updateButtons() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '/game_board');
+        xhr.onload = () => {
+          const data = JSON.parse(xhr.responseText);
+          for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+              const button = document.getElementById(`cell-${row}-${col}`);
+              button.textContent = data[row][col];
+            }
+          }
+        };
+        xhr.send();
+      }
+     
+
+    </script>
+  </body>
+</html>

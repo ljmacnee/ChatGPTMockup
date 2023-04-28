@@ -5,7 +5,14 @@ class Game:
     self.winner = None
     self.game_over = False
 
+  def toggle_player(self):
+    if self.current_player == 'X':
+      self.current_player = 'O'
+    else:
+      self.current_player = 'X'
+
   def play_move(self, row, col):
+    print("Received move:", row, col)
     if self.board[row][col] == '':
       self.board[row][col] = self.current_player
       self.check_for_winner()
@@ -40,3 +47,4 @@ class Game:
     # Check for tie
     if all(cell != '' for row in self.board for cell in row):
       self.game_over = True
+
