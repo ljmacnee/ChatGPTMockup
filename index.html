@@ -1,0 +1,43 @@
+<table>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  <script>
+    const cells = document.querySelectorAll('td');
+    cells.forEach(cell => {
+    cell.addEventListener('click', () => {
+        if (!cell.textContent) {
+        cell.textContent = currentPlayerSymbol;
+        checkForWinner();
+        togglePlayer();
+        }
+    });
+    });
+
+    function playMove(row, col) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/play_move');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = () => {
+            const data = JSON.parse(xhr.responseText);
+            updateGameBoard(data.board);
+            updateGameStatus(data.status);
+        };
+        const payload = JSON.stringify({row, col});
+        xhr.send(payload);
+    }
+  </script>
