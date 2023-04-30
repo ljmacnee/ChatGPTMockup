@@ -11,9 +11,10 @@ def index():
     return render_template('index.html')
 
 # Route to get the current game board state
-@app.route('/game_board')
-def game_board():
-    return jsonify(game.board)
+@app.route('/game_state')
+def game_state():
+    # Return a JSON response with the updated board state and game status
+    return jsonify({'board': game.board, 'status': game.status, 'symbol': game.current_player})
 
 @app.route('/play_move', methods=['POST'])
 def play_move():
@@ -40,6 +41,7 @@ def play_move():
     else:
         status = f"It's {game.current_player}'s turn"
 
+    game.status = status
     # Return a JSON response with the updated board state and game status
     return jsonify({'board': game.board, 'status': status, 'symbol': game.current_player})
 

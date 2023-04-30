@@ -4,6 +4,7 @@ class Game:
     self.current_player = 'X'
     self.winner = None
     self.game_over = False
+    self.status = ""
 
   def toggle_player(self):
     if self.current_player == 'X':

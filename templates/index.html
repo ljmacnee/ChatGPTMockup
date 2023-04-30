@@ -6,6 +6,7 @@
   </head>
   <body onload="updateButtons()">
     <h1>Tic Tac Toe</h1>
+    <h3>Stack: Vanilla JS Front, Flask Back</h3>
     <table>
       <tr>
         <td><button id="cell-0-0" onclick="playMove(0, 0)"></button></td>
@@ -23,9 +24,28 @@
         <td><button id="cell-2-2" onclick="playMove(2, 2)"></button></td>
       </tr>
     </table>
-    <p id="status"></p>
+    <button id="reset" onclick="reset()"></button>
+    <p id="status">Active</p>
     <script>
+
+      function reset() {
+
+         
+         updateButtons()
+      }
+
+      function endGame(status) {
+        console.log('endGame called with status', status);
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = status;
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+          button.disabled = true;
+        });
+      }
+
       function playMove(row, col) {
+        console.log('playMoveCalled');
         const button = document.getElementById(`cell-${row}-${col}`);
         if (!button.textContent) {
           const xhr = new XMLHttpRequest();
@@ -34,10 +54,13 @@
           xhr.onload = () => {
             const data = JSON.parse(xhr.responseText);
             if (data.gameOver) {
+              console.log('endGame called with status', status);
               endGame(data.status);
             }
             else{
               button.textContent = data.symbol;
+              const statusElement = document.getElementById('status');
+              statusElement.textContent = data.status;
             }
            
           };
@@ -48,24 +71,19 @@
         }
       }
 
-      function endGame(status) {
-        const statusElement = document.getElementById('status');
-        statusElement.textContent = status;
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-          button.disabled = true;
-        });
-      }
+      
 
       function updateButtons() {
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', '/game_board');
+        xhr.open('GET', '/game_state');
         xhr.onload = () => {
           const data = JSON.parse(xhr.responseText);
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = data.status;
           for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 3; col++) {
               const button = document.getElementById(`cell-${row}-${col}`);
-              button.textContent = data[row][col];
+              button.textContent = data.board[row][col];
             }
           }
         };
