@@ -1,50 +1,40 @@
-from flask import Flask, jsonify,request, render_template
-from game import Game
+# Import necessary libraries
+import openai
+from flask import Flask, request, jsonify
+import config
 
+# Set up OpenAI API key
+openai.api_key = config.API_KEY
+
+# Initialize Flask app
 app = Flask(__name__)
 
-# Instantiate the Game class
-game = Game()
+# Define endpoint for chatbot
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    # Get user input from request
+    input_text = request.json['text']
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+    # Set up OpenAI GPT-3 parameters
+    model_engine = "text-davinci-002"
+    prompt = f"User: {input_text}\nChatbot:"
 
-# Route to get the current game board state
-@app.route('/game_state')
-def game_state():
-    # Return a JSON response with the updated board state and game status
-    return jsonify({'board': game.board, 'status': game.status, 'symbol': game.current_player})
+    # Use OpenAI API to generate response
+    response = openai.Completion.create(
+        engine=model_engine,
+        prompt=prompt,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.7,
+    )
 
-@app.route('/play_move', methods=['POST'])
-def play_move():
-    data = request.get_json()
-    row = data['row']
-    col = data['col']
+    # Extract chatbot response from OpenAI API response
+    chatbot_response = response.choices[0].text.strip()
 
-    # Check if the game is over
-    if game.game_over:
-        return jsonify({'error': 'Game over'})
+    # Return chatbot response as JSON
+    return jsonify({'response': chatbot_response})
 
-    # Check if the move is valid
-    if not (0 <= row <= 2 and 0 <= col <= 2 and game.board[row][col] == ''):
-        return jsonify({'error': 'Invalid move'})
-
-    # Call the play_move method of the Game instance
-    game.play_move(row, col)
-
-    # Check if there is a winner
-    if game.winner:
-        status = f'{game.winner} wins!'
-    elif game.game_over:
-        status = 'It\'s a tie!'
-    else:
-        status = f"It's {game.current_player}'s turn"
-
-    game.status = status
-    # Return a JSON response with the updated board state and game status
-    return jsonify({'board': game.board, 'status': status, 'symbol': game.current_player})
-
-
+# Run Flask app
 if __name__ == '__main__':
     app.run(debug=True)
